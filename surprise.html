@@ -38,7 +38,7 @@
         radial-gradient(2px 2px at 88% 70%, rgba(255,255,255,.35) 40%, transparent 41%),
         radial-gradient(1px 1px at 65% 78%, rgba(255,255,255,.30) 40%, transparent 41%),
         radial-gradient(2px 2px at 40% 78%, rgba(255,255,255,.33) 40%, transparent 41%),
-        radial-gradient(800px 520px at 50% 30%, rgba(183,136,255,.12), transparent 60%),
+        radial-gradient(900px 520px at 50% 30%, rgba(183,136,255,.12), transparent 60%),
         radial-gradient(700px 520px at 20% 85%, rgba(255,61,142,.10), transparent 60%);
       opacity:.95;
       pointer-events:none;
@@ -55,6 +55,13 @@
       opacity:.28;
       z-index:2;
       filter: drop-shadow(0 0 14px rgba(183,136,255,.15));
+    }
+
+    #fx{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:2;
     }
 
     .wrap{
@@ -77,7 +84,7 @@
       width:min(820px, 94vw);
       height:520px;
       display:grid;
-      place-items:end center;
+      place-items:center;
       position:relative;
     }
 
@@ -85,14 +92,17 @@
     .envelope{
       width:min(380px, 90vw);
       height:240px;
-      position:relative;
+      position:absolute;
+      left:50%;
+      bottom:120px;
+      transform: translateX(-50%);
       cursor:pointer;
       user-select:none;
       filter: drop-shadow(0 26px 50px rgba(0,0,0,.70));
-      transition: transform .22s ease;
-      z-index:4;
+      transition: transform .22s ease, opacity .25s ease;
+      z-index:5; /* below letter */
     }
-    .envelope:hover{ transform: translateY(-3px) scale(1.01); }
+    .envelope:hover{ transform: translateX(-50%) translateY(-3px) scale(1.01); }
 
     .env-body{
       position:absolute; inset:0;
@@ -150,13 +160,13 @@
       z-index:7;
     }
 
-    /* Letter that slides out */
+    /* Letter */
     .letter{
       position:absolute;
       left:50%;
-      bottom:168px;
-      transform: translateX(-50%) translateY(110px);
-      width: min(560px, 92vw);
+      top:50%;
+      transform: translate(-50%,-50%) translateY(30px);
+      width: min(620px, 92vw);
       background: linear-gradient(180deg, var(--paper), #efe8ff);
       color: var(--ink);
       border-radius:20px;
@@ -165,10 +175,9 @@
       box-shadow: 0 24px 70px rgba(0,0,0,.45);
       opacity:0;
       pointer-events:none;
-      transition: transform .75s cubic-bezier(.2,.9,.2,1), opacity .45s ease;
-      z-index:3;
-
-      max-height: 280px;
+      transition: transform .65s cubic-bezier(.2,.9,.2,1), opacity .35s ease;
+      z-index:10; /* above envelope */
+      max-height: 320px;
       overflow:auto;
     }
     .letter h2{ margin:0 0 8px; font-size:20px; }
@@ -177,9 +186,10 @@
     /* Buttons pinned bottom left/right */
     .btnBar{
       position:relative;
-      height:54px;
-      margin-top:8px;
+      height:56px;
+      margin-top:10px;
     }
+
     button{
       border:0;
       border-radius:999px;
@@ -187,9 +197,16 @@
       font-weight:900;
       cursor:pointer;
       user-select:none;
-      transition: transform .15s ease, filter .15s ease, opacity .15s ease;
+      transition: filter .15s ease, opacity .15s ease;
     }
-    button:active{ transform: scale(.98); }
+    button:active{ transform: translateY(1px); }
+
+    /* Always readable */
+    #yesBtn, #noBtn{
+      white-space: normal;
+      line-height: 1.2;
+      text-align:center;
+    }
 
     #yesBtn{
       position:absolute; left:0; bottom:0;
@@ -197,8 +214,7 @@
       color:#fff;
       box-shadow: 0 18px 45px rgba(255,61,142,.25);
       min-width: 260px;
-      font-size: 14px;
-      transform: scale(1);
+      max-width: min(380px, 76vw);
     }
     #noBtn{
       position:absolute; right:0; bottom:0;
@@ -206,7 +222,7 @@
       color:#fff;
       border: 1px solid rgba(255,255,255,.10);
       min-width: 170px;
-      font-size: 14px;
+      max-width: min(280px, 60vw);
       opacity:.92;
     }
 
@@ -217,22 +233,27 @@
     }
     .status b{ color: var(--pink); }
 
-    /* Open state */
-    .open .flap{ transform: rotateX(165deg); }
+    /* Open state: letter appears, envelope disappears */
     .open .letter{
       opacity:1;
       pointer-events:auto;
-      transform: translateX(-50%) translateY(0px);
+      transform: translate(-50%,-50%) translateY(0px);
     }
+    .open .envelope{
+      opacity:0;
+      pointer-events:none;
+      transform: translateX(-50%) translateY(20px) scale(.96);
+    }
+    .open .flap{ transform: rotateX(165deg); }
 
-    /* Celebration state */
+    /* Final state */
     .hiddenAll .hint,
     .hiddenAll .stage{ display:none; }
 
     .finalNote{
       display:none;
       text-align:center;
-      width:min(720px, 92vw);
+      width:min(760px, 92vw);
       padding: 18px 16px;
       border-radius: 18px;
       background: rgba(0,0,0,.35);
@@ -241,7 +262,7 @@
       z-index:4;
     }
     .finalNote h3{ margin:0 0 10px; font-size:22px; }
-    .finalNote p{ margin:0; font-size:15px; line-height:1.4; opacity:.96; }
+    .finalNote p{ margin:0; font-size:15px; line-height:1.45; opacity:.96; }
     .finalNote b{ color: var(--lilac); }
 
     /* petals */
@@ -257,21 +278,12 @@
     @keyframes fall{
       to{ transform: translate3d(var(--dx), 110vh, 0) rotate(var(--rot)); }
     }
-
-    /* fireworks canvas */
-    #fx{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:2;
-    }
   </style>
 </head>
 
 <body>
   <div class="sky"></div>
 
-  <!-- simple constellation lines -->
   <svg class="constellations" viewBox="0 0 100 100" preserveAspectRatio="none">
     <g stroke="rgba(210,181,255,0.65)" stroke-width="0.2" fill="none">
       <path d="M10,20 L18,28 L26,24 L33,35 L40,30" />
@@ -321,8 +333,8 @@
     <div class="finalNote" id="finalNote">
       <h3>💖 Félicitations, mon bébé 💖</h3>
       <p>
-        Rendez-vous au <b>Luxembourg</b> quand j’arrive ✨<br>
-        Dress code : <b>ton magnifique sourire</b> 😘<br>
+        Rendez-vous au <b>Luxembourg</b> quand j’arriverai ✨<br>
+        Dress code : <b>ton sourire magnifique </b> 😘<br>
         Je t’aime ❤️
       </p>
     </div>
@@ -348,8 +360,8 @@
 
     envelope.addEventListener('click', () => {
       startMusic();
-      opened = !opened;
-      document.body.classList.toggle('open', opened);
+      opened = true;
+      document.body.classList.add('open'); // open once
     });
 
     // "Non" text changes in order
@@ -359,9 +371,11 @@
       "Réfléchis bien"
     ];
     let noIndex = 0;
-    let yesScale = 1;
+    let tries = 0;
 
     function punishNo(){
+      tries++;
+
       if (noIndex < noTexts.length){
         noBtn.textContent = noTexts[noIndex++];
       } else {
@@ -371,14 +385,17 @@
         noBtn.style.cursor = "not-allowed";
       }
 
-      // make YES feel more “inevitable”
-      yesScale = Math.min(4.6, yesScale + 0.35);
-      yesBtn.style.transform = `scale(${yesScale})`;
-      yesBtn.style.filter = `brightness(${Math.min(1.18, 1 + (yesScale-1)*0.05)})`;
+      // Grow YES without scale so text stays readable
+      const baseWidth = 260;
+      const extra = Math.min(240, tries * 70);
+      const pad = Math.min(34, 14 + tries * 4);
+      yesBtn.style.minWidth = (baseWidth + extra) + "px";
+      yesBtn.style.paddingLeft = pad + "px";
+      yesBtn.style.paddingRight = pad + "px";
+      yesBtn.style.filter = `brightness(${Math.min(1.18, 1 + tries*0.03)})`;
 
-      const noShrink = Math.max(0.80, 1 - (yesScale-1)*0.10);
-      noBtn.style.transform = `scale(${noShrink})`;
-      noBtn.style.opacity = `${Math.max(0.20, 0.92 - (yesScale-1)*0.16)}`;
+      // Fade NO gently
+      noBtn.style.opacity = String(Math.max(0.25, 0.92 - tries * 0.18));
 
       status.innerHTML = `Petit rappel : il existe <b>une seule</b> bonne réponse 😇`;
     }
@@ -388,7 +405,7 @@
     noBtn.addEventListener('touchstart', punishNo, {passive:true});
 
     // Petals
-    function spawnPetals(durationMs=7000){
+    function spawnPetals(durationMs=8000){
       const endAt = Date.now() + durationMs;
       const chars = ["🌹","🌸","💐","💗"];
       (function tick(){
@@ -401,7 +418,7 @@
         el.style.setProperty('--rot', (Math.random()*720 - 360).toFixed(0) + "deg");
         el.style.animationDuration = (Math.random()*2.8 + 3.4).toFixed(2) + "s";
         document.body.appendChild(el);
-        setTimeout(()=>el.remove(), 8000);
+        setTimeout(()=>el.remove(), 8500);
         setTimeout(tick, 70);
       })();
     }
@@ -409,6 +426,7 @@
     // Fireworks (canvas particles)
     const canvas = document.getElementById('fx');
     const ctx = canvas.getContext('2d');
+
     function resize(){
       const dpr = Math.max(1, window.devicePixelRatio || 1);
       canvas.width = Math.floor(window.innerWidth * dpr);
@@ -422,7 +440,7 @@
 
     let particles = [];
     function burst(x,y){
-      const count = 120;
+      const count = 130;
       for(let i=0;i<count;i++){
         const a = Math.random()*Math.PI*2;
         const s = Math.random()*6 + 2;
@@ -445,8 +463,8 @@
         p.x += p.vx;
         p.y += p.vy;
 
-        const alpha = Math.max(0, Math.min(1, p.life/95));
-        const hue = (i*8 + (Date.now()/22)) % 360;
+        const alpha = Math.max(0, Math.min(1, p.life/100));
+        const hue = (i*9 + (Date.now()/22)) % 360;
         ctx.fillStyle = `hsla(${hue}, 95%, 65%, ${alpha})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
@@ -473,12 +491,10 @@
     yesBtn.addEventListener('click', () => {
       startMusic();
 
-      // remove the envelope/letter UI
       wrap.classList.add('hiddenAll');
       finalNote.style.display = 'block';
 
-      // celebrations
-      spawnPetals(8000);
+      spawnPetals(9000);
       fireworksShow();
       setTimeout(fireworksShow, 1100);
       setTimeout(fireworksShow, 2200);
