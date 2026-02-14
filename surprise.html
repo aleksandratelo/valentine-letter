@@ -6,204 +6,345 @@
 <title>Pour toi 💜</title>
 
 <style>
-body{
-margin:0;
-background:black;
-color:white;
-font-family:Arial,Helvetica,sans-serif;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-overflow:hidden;
-}
+  :root{
+    --bg:#000;
+    --lilac:#b57cff;
+    --paper:#fff;
+    --ink:#111;
+    --accent:#ff3d8e;
+  }
 
-/* envelope */
-#envelope{
-width:260px;
-height:180px;
-background:#b57cff;
-position:relative;
-cursor:pointer;
-border-radius:10px;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:50px;
-transition:0.5s;
-}
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    height:100vh;
+    background: radial-gradient(900px 500px at 50% 25%, rgba(181,124,255,.16), transparent 60%), var(--bg);
+    color:#fff;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    display:grid;
+    place-items:center;
+    overflow:hidden;
+  }
 
-#letter{
-position:absolute;
-top:-250px;
-width:300px;
-background:white;
-color:black;
-padding:20px;
-border-radius:15px;
-text-align:center;
-display:none;
-}
+  .wrap{
+    width:min(520px, 92vw);
+    position:relative;
+    text-align:center;
+  }
 
-button{
-margin:10px;
-padding:12px 18px;
-border:none;
-border-radius:20px;
-font-weight:bold;
-cursor:pointer;
-}
+  .hint{
+    margin:0 0 14px;
+    opacity:.85;
+    font-size:14px;
+  }
 
-#yes{
-background:#ff3d8e;
-color:white;
-}
+  /* stage gives room for the letter to slide out */
+  .stage{
+    position:relative;
+    height:420px;
+    display:grid;
+    place-items:end center;
+  }
 
-#no{
-background:#333;
-color:white;
-}
+  /* letter: hidden by default, slides up when open */
+  .letter{
+    width:min(430px, 92vw);
+    background: var(--paper);
+    color: var(--ink);
+    border-radius:16px;
+    padding:18px 16px 14px;
+    box-shadow: 0 22px 60px rgba(0,0,0,.55);
+    border: 1px solid rgba(181,124,255,.35);
 
-/* celebration */
-#celebration{
-display:none;
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-text-align:center;
-}
+    position:absolute;
+    left:50%;
+    bottom:160px;
+    transform: translateX(-50%) translateY(40px);
+    opacity:0;
+    pointer-events:none;
+    transition: transform .55s ease, opacity .35s ease;
 
-canvas{
-position:fixed;
-top:0;
-left:0;
-pointer-events:none;
-}
+    /* IMPORTANT: prevent “huge white box” */
+    max-height: 240px;
+    overflow:auto;
+  }
+
+  .open .letter{
+    transform: translateX(-50%) translateY(0px);
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .letter h2{margin:0 0 8px; font-size:18px}
+  .letter p{margin:0 0 12px; font-size:14px; line-height:1.35}
+
+  .btnRow{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  button{
+    border:0;
+    border-radius:999px;
+    padding:12px 14px;
+    font-weight:800;
+    cursor:pointer;
+    user-select:none;
+  }
+  #yes{
+    background: linear-gradient(135deg, var(--accent), #ff1f78);
+    color:#fff;
+    min-width: 260px;
+  }
+  #no{
+    background:#222;
+    color:#fff;
+    min-width: 120px;
+    opacity:.9;
+  }
+
+  .status{
+    margin-top:10px;
+    font-size:12.5px;
+    opacity:.75;
+  }
+
+  /* envelope */
+  .envelope{
+    width:min(320px, 86vw);
+    height:200px;
+    background: linear-gradient(135deg, rgba(181,124,255,.98), rgba(148,96,255,.95));
+    border-radius:18px;
+    position:relative;
+    box-shadow: 0 28px 80px rgba(0,0,0,.55);
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(255,255,255,.12);
+  }
+
+  .envelope:before{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:18px;
+    background: radial-gradient(600px 200px at 50% 0%, rgba(255,255,255,.25), transparent 60%);
+    pointer-events:none;
+  }
+
+  .seal{
+    width:64px; height:64px;
+    border-radius:999px;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(0,0,0,.05)),
+                linear-gradient(135deg, var(--accent), #ff1f78);
+    display:grid; place-items:center;
+    font-size:28px;
+    border:1px solid rgba(255,255,255,.16);
+    box-shadow: 0 16px 40px rgba(255,61,142,.25);
+    z-index:2;
+  }
+
+  .celebration{
+    display:none;
+    margin-top:14px;
+    padding:14px 14px 12px;
+    border-radius:16px;
+    background: rgba(255,255,255,.08);
+    border:1px solid rgba(181,124,255,.25);
+    box-shadow: 0 22px 70px rgba(0,0,0,.45);
+  }
+  .celebration h3{margin:0 0 6px}
+  .celebration p{margin:0; font-size:14px; line-height:1.35}
+
+  /* petals */
+  .petal{
+    position:fixed;
+    top:-30px;
+    font-size:18px;
+    pointer-events:none;
+    z-index:5;
+    animation: fall linear forwards;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.55));
+  }
+  @keyframes fall{
+    to{
+      transform: translate3d(var(--dx), 110vh, 0) rotate(var(--rot));
+    }
+  }
+
+  canvas{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:1;
+  }
 </style>
 </head>
 
 <body>
-
 <audio id="music" loop>
-<source src="song.mp3" type="audio/mpeg">
+  <source src="song.mp3" type="audio/mpeg">
 </audio>
-
-<div id="envelope">💌</div>
-
-<div id="letter">
-<h2>Mon amour...</h2>
-<p>Veux-tu être mon Valentin aujourd’hui ? 💘</p>
-
-<button id="yes">Bien sûr que oui princesse 👑</button>
-<button id="no">Non</button>
-
-<p id="warning">Il n’existe qu’une seule bonne réponse 😌</p>
-</div>
-
-<div id="celebration">
-<h1>Félicitations ❤️</h1>
-<p>Rendez-vous quand j’arrive au Luxembourg ✨<br>
-Dress code : ton magnifique sourire 😘</p>
-</div>
 
 <canvas id="fireworks"></canvas>
 
+<div class="wrap" id="wrap">
+  <p class="hint">Clique sur l’enveloppe 💜 (il n’y a qu’une seule bonne réponse 😇)</p>
+
+  <div class="stage">
+    <div class="letter" id="letter">
+      <h2>Mon amour…</h2>
+      <p>Veux-tu être <b>mon Valentin</b> aujourd’hui ? 💘</p>
+
+      <div class="btnRow">
+        <button id="yes">Bien sûr que oui, ma princesse 👑</button>
+        <button id="no">Non</button>
+      </div>
+
+      <div class="status" id="warning">Petit rappel : il existe <b>une seule</b> bonne réponse 😉</div>
+
+      <div class="celebration" id="celebration">
+        <h3>Félicitations ! 🎉💖</h3>
+        <p>
+          Rendez-vous quand j’arrive au <b>Luxembourg</b> ✨<br>
+          Dress code : <b>ton sourire magnifique</b> 😘
+        </p>
+      </div>
+    </div>
+
+    <div class="envelope" id="envelope" aria-label="Ouvrir l'enveloppe">
+      <div class="seal">✉️</div>
+    </div>
+  </div>
+</div>
+
 <script>
-const env=document.getElementById("envelope");
-const letter=document.getElementById("letter");
-const yes=document.getElementById("yes");
-const no=document.getElementById("no");
-const music=document.getElementById("music");
-const celebration=document.getElementById("celebration");
+  const wrap = document.getElementById('wrap');
+  const envelope = document.getElementById('envelope');
+  const letter = document.getElementById('letter');
+  const yes = document.getElementById('yes');
+  const no = document.getElementById('no');
+  const warning = document.getElementById('warning');
+  const celebration = document.getElementById('celebration');
+  const music = document.getElementById('music');
 
-let tries=0;
+  let opened = false;
 
-env.onclick=()=>{
-letter.style.display="block";
-music.play();
-};
+  envelope.addEventListener('click', () => {
+    opened = !opened;
+    wrap.classList.toggle('open', opened);
+    // start music on user gesture
+    music.volume = 0.8;
+    music.play().catch(()=>{});
+  });
 
-const texts=[
-"Tu es sûr ?",
-"Je pense que tu voulais cliquer sur oui 😇",
-"Ne m’énerve pas 😌",
-"Dernière chance..."
-];
+  const texts = [
+    "Tu es sûr ?",
+    "Je suis sûre que tu t’es trompé et tu voulais cliquer sur OUI 😇",
+    "Ne m’énerve pas 😌",
+    "Tu as une dernière chance."
+  ];
+  let tries = 0;
+  let yesScale = 1;
 
-no.onclick=()=>{
-if(tries<texts.length){
-no.textContent=texts[tries];
-tries++;
-yes.style.transform=`scale(${1+tries*0.3})`;
-}else{
-no.disabled=true;
-}
-};
+  function punishNo(){
+    if (tries < texts.length){
+      no.textContent = texts[tries++];
+    } else {
+      no.textContent = "…";
+      no.disabled = true;
+      no.style.opacity = "0.25";
+      no.style.cursor = "not-allowed";
+    }
+    yesScale = Math.min(4.2, yesScale + 0.35);
+    yes.style.transform = `scale(${yesScale})`;
+    no.style.transform = `scale(${Math.max(0.8, 1 - (yesScale-1)*0.08)})`;
+    warning.innerHTML = `Petit rappel : il existe <b>une seule</b> bonne réponse 😉`;
+  }
 
-yes.onclick=()=>{
-letter.style.display="none";
-celebration.style.display="block";
-startFireworks();
-petals();
-};
+  no.addEventListener('click', (e)=>{ e.preventDefault(); punishNo(); });
+  no.addEventListener('mouseenter', punishNo);
+  no.addEventListener('touchstart', punishNo, {passive:true});
 
-/* fireworks */
-const canvas=document.getElementById("fireworks");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
+  // fireworks
+  const canvas = document.getElementById("fireworks");
+  const ctx = canvas.getContext("2d");
+  function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
 
-let particles=[];
+  let particles = [];
+  function burst(x,y){
+    for(let i=0;i<110;i++){
+      const a = Math.random()*Math.PI*2;
+      const s = Math.random()*6 + 2;
+      particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:Math.random()*45+55});
+    }
+  }
+  function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation="lighter";
+    for(let i=particles.length-1;i>=0;i--){
+      const p = particles[i];
+      p.life -= 1;
+      p.vy += 0.06;
+      p.x += p.vx;
+      p.y += p.vy;
+      const alpha = Math.max(0, Math.min(1, p.life/90));
+      const hue = (i*8 + Date.now()/20) % 360;
+      ctx.fillStyle = `hsla(${hue},95%,65%,${alpha})`;
+      ctx.fillRect(p.x,p.y,3,3);
+      if(p.life<=0) particles.splice(i,1);
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
 
-function startFireworks(){
-for(let i=0;i<80;i++){
-particles.push({
-x:canvas.width/2,
-y:canvas.height/2,
-vx:(Math.random()-0.5)*8,
-vy:(Math.random()-0.5)*8,
-life:100
-});
-}
-animate();
-}
+  function fireworksShow(){
+    for(let i=0;i<10;i++){
+      setTimeout(()=>{
+        burst(
+          Math.random()*window.innerWidth*0.8 + window.innerWidth*0.1,
+          Math.random()*window.innerHeight*0.35 + window.innerHeight*0.1
+        );
+      }, i*220);
+    }
+  }
 
-function animate(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-particles.forEach(p=>{
-ctx.fillStyle="hsl("+Math.random()*360+",100%,60%)";
-ctx.fillRect(p.x,p.y,3,3);
-p.x+=p.vx;
-p.y+=p.vy;
-p.life--;
-});
-particles=particles.filter(p=>p.life>0);
-if(particles.length>0) requestAnimationFrame(animate);
-}
+  // petals
+  function petals(durationMs=6000){
+    const endAt = Date.now() + durationMs;
+    const chars = ["🌹","💗","🌸","💜"];
+    (function tick(){
+      if(Date.now()>endAt) return;
+      const el = document.createElement("div");
+      el.className = "petal";
+      el.textContent = chars[Math.floor(Math.random()*chars.length)];
+      el.style.left = (Math.random()*100) + "vw";
+      el.style.setProperty("--dx", (Math.random()*60-30).toFixed(1) + "vw");
+      el.style.setProperty("--rot", (Math.random()*720-360).toFixed(0) + "deg");
+      el.style.animationDuration = (Math.random()*2.6 + 3.2).toFixed(2) + "s";
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 7000);
+      setTimeout(tick, 70);
+    })();
+  }
 
-/* petals */
-function petals(){
-setInterval(()=>{
-let petal=document.createElement("div");
-petal.textContent="🌹";
-petal.style.position="fixed";
-petal.style.left=Math.random()*100+"vw";
-petal.style.top="-20px";
-petal.style.fontSize="20px";
-document.body.appendChild(petal);
-
-let fall=setInterval(()=>{
-petal.style.top=parseInt(petal.style.top)+5+"px";
-if(parseInt(petal.style.top)>window.innerHeight){
-clearInterval(fall);
-petal.remove();
-}
-},30);
-
-},200);
-}
+  yes.addEventListener('click', () => {
+    music.play().catch(()=>{});
+    celebration.style.display = "block";
+    yes.disabled = true;
+    no.disabled = true;
+    no.style.opacity = "0.25";
+    no.style.cursor = "not-allowed";
+    fireworksShow();
+    setTimeout(fireworksShow, 1100);
+    petals(6500);
+  });
 </script>
-
 </body>
 </html>
