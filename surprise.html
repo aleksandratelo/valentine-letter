@@ -24,7 +24,7 @@
       overflow:hidden;
     }
 
-    /* Constellation-like starfield */
+    /* Stars + glow */
     .sky{
       position:fixed; inset:0;
       background:
@@ -47,7 +47,7 @@
     }
     @keyframes twinkle{ from{opacity:.55} to{opacity:.95} }
 
-    /* Constellation lines overlay */
+    /* Constellations overlay */
     svg.constellations{
       position:fixed; inset:0;
       width:100%; height:100%;
@@ -57,6 +57,7 @@
       filter: drop-shadow(0 0 14px rgba(183,136,255,.15));
     }
 
+    /* Fireworks canvas */
     #fx{
       position:fixed;
       inset:0;
@@ -100,7 +101,7 @@
       user-select:none;
       filter: drop-shadow(0 26px 50px rgba(0,0,0,.70));
       transition: transform .22s ease, opacity .25s ease;
-      z-index:5; /* below letter */
+      z-index:5;
     }
     .envelope:hover{ transform: translateX(-50%) translateY(-3px) scale(1.01); }
 
@@ -114,7 +115,6 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-
     .flap{
       position:absolute; left:0; right:0; top:0;
       height:56%;
@@ -131,7 +131,6 @@
       clip-path: polygon(0 0, 100% 0, 50% 100%);
       background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(0,0,0,0));
     }
-
     .front{
       position:absolute; inset:0;
       z-index:5;
@@ -143,7 +142,6 @@
       background: rgba(255,255,255,.10);
       opacity:.40;
     }
-
     .seal{
       position:absolute;
       left:50%; top:57%;
@@ -176,20 +174,19 @@
       opacity:0;
       pointer-events:none;
       transition: transform .65s cubic-bezier(.2,.9,.2,1), opacity .35s ease;
-      z-index:10; /* above envelope */
+      z-index:10;
       max-height: 320px;
       overflow:auto;
     }
     .letter h2{ margin:0 0 8px; font-size:20px; }
     .letter p{ margin:0 0 12px; font-size:14.5px; line-height:1.35; opacity:.95; }
 
-    /* Buttons pinned bottom left/right */
+    /* Buttons: bottom left/right */
     .btnBar{
       position:relative;
       height:56px;
       margin-top:10px;
     }
-
     button{
       border:0;
       border-radius:999px;
@@ -201,7 +198,6 @@
     }
     button:active{ transform: translateY(1px); }
 
-    /* Always readable */
     #yesBtn, #noBtn{
       white-space: normal;
       line-height: 1.2;
@@ -233,20 +229,14 @@
     }
     .status b{ color: var(--pink); }
 
-    /* Open state: letter appears, envelope disappears */
+    /* Open: letter appears */
     .open .letter{
       opacity:1;
       pointer-events:auto;
       transform: translate(-50%,-50%) translateY(0px);
     }
-    .open .envelope{
-      opacity:0;
-      pointer-events:none;
-      transform: translateX(-50%) translateY(20px) scale(.96);
-    }
-    .open .flap{ transform: rotateX(165deg); }
 
-    /* Final state */
+    /* Final: hide UI */
     .hiddenAll .hint,
     .hiddenAll .stage{ display:none; }
 
@@ -349,27 +339,22 @@
     const finalNote = document.getElementById('finalNote');
     const song = document.getElementById('song');
 
-    let opened = false;
     let musicStarted = false;
-
     function startMusic(){
       if (musicStarted) return;
       song.volume = 0.85;
       song.play().then(()=>{ musicStarted = true; }).catch(()=>{});
     }
 
+    // OPEN: show letter + REMOVE envelope completely
     envelope.addEventListener('click', () => {
       startMusic();
-      opened = true;
-      document.body.classList.add('open'); // open once
+      document.body.classList.add('open');
+      envelope.style.display = "none";  // ✅ disappears fully
     });
 
     // "Non" text changes in order
-    const noTexts = [
-      "Tu es sûr ?",
-      "Ne m’énerve pas",
-      "Réfléchis bien"
-    ];
+    const noTexts = ["Tu es sûr ?", "Ne m’énerve pas", "Réfléchis bien"];
     let noIndex = 0;
     let tries = 0;
 
@@ -385,7 +370,7 @@
         noBtn.style.cursor = "not-allowed";
       }
 
-      // Grow YES without scale so text stays readable
+      // Grow YES without scale (always readable)
       const baseWidth = 260;
       const extra = Math.min(240, tries * 70);
       const pad = Math.min(34, 14 + tries * 4);
@@ -405,7 +390,7 @@
     noBtn.addEventListener('touchstart', punishNo, {passive:true});
 
     // Petals
-    function spawnPetals(durationMs=8000){
+    function spawnPetals(durationMs=9000){
       const endAt = Date.now() + durationMs;
       const chars = ["🌹","🌸","💐","💗"];
       (function tick(){
@@ -418,12 +403,12 @@
         el.style.setProperty('--rot', (Math.random()*720 - 360).toFixed(0) + "deg");
         el.style.animationDuration = (Math.random()*2.8 + 3.4).toFixed(2) + "s";
         document.body.appendChild(el);
-        setTimeout(()=>el.remove(), 8500);
+        setTimeout(()=>el.remove(), 9500);
         setTimeout(tick, 70);
       })();
     }
 
-    // Fireworks (canvas particles)
+    // Fireworks
     const canvas = document.getElementById('fx');
     const ctx = canvas.getContext('2d');
 
@@ -444,13 +429,7 @@
       for(let i=0;i<count;i++){
         const a = Math.random()*Math.PI*2;
         const s = Math.random()*6 + 2;
-        particles.push({
-          x, y,
-          vx: Math.cos(a)*s,
-          vy: Math.sin(a)*s,
-          life: Math.random()*40 + 55,
-          r: Math.random()*2 + 1
-        });
+        particles.push({ x,y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, life:Math.random()*40+55, r:Math.random()*2+1 });
       }
     }
     function animate(){
@@ -487,13 +466,11 @@
       }
     }
 
-    // YES => hide all, show final note, petals + fireworks
+    // YES => hide everything, show note + petals + fireworks
     yesBtn.addEventListener('click', () => {
       startMusic();
-
       wrap.classList.add('hiddenAll');
       finalNote.style.display = 'block';
-
       spawnPetals(9000);
       fireworksShow();
       setTimeout(fireworksShow, 1100);
