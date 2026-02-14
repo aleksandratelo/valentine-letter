@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pour toi 💜</title>
+
+<style>
+body{
+margin:0;
+background:black;
+color:white;
+font-family:Arial,Helvetica,sans-serif;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+overflow:hidden;
+}
+
+/* envelope */
+#envelope{
+width:260px;
+height:180px;
+background:#b57cff;
+position:relative;
+cursor:pointer;
+border-radius:10px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:50px;
+transition:0.5s;
+}
+
+#letter{
+position:absolute;
+top:-250px;
+width:300px;
+background:white;
+color:black;
+padding:20px;
+border-radius:15px;
+text-align:center;
+display:none;
+}
+
+button{
+margin:10px;
+padding:12px 18px;
+border:none;
+border-radius:20px;
+font-weight:bold;
+cursor:pointer;
+}
+
+#yes{
+background:#ff3d8e;
+color:white;
+}
+
+#no{
+background:#333;
+color:white;
+}
+
+/* celebration */
+#celebration{
+display:none;
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+text-align:center;
+}
+
+canvas{
+position:fixed;
+top:0;
+left:0;
+pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<audio id="music" loop>
+<source src="song.mp3" type="audio/mpeg">
+</audio>
+
+<div id="envelope">💌</div>
+
+<div id="letter">
+<h2>Mon amour...</h2>
+<p>Veux-tu être mon Valentin aujourd’hui ? 💘</p>
+
+<button id="yes">Bien sûr que oui princesse 👑</button>
+<button id="no">Non</button>
+
+<p id="warning">Il n’existe qu’une seule bonne réponse 😌</p>
+</div>
+
+<div id="celebration">
+<h1>Félicitations ❤️</h1>
+<p>Rendez-vous quand j’arrive au Luxembourg ✨<br>
+Dress code : ton magnifique sourire 😘</p>
+</div>
+
+<canvas id="fireworks"></canvas>
+
+<script>
+const env=document.getElementById("envelope");
+const letter=document.getElementById("letter");
+const yes=document.getElementById("yes");
+const no=document.getElementById("no");
+const music=document.getElementById("music");
+const celebration=document.getElementById("celebration");
+
+let tries=0;
+
+env.onclick=()=>{
+letter.style.display="block";
+music.play();
+};
+
+const texts=[
+"Tu es sûr ?",
+"Je pense que tu voulais cliquer sur oui 😇",
+"Ne m’énerve pas 😌",
+"Dernière chance..."
+];
+
+no.onclick=()=>{
+if(tries<texts.length){
+no.textContent=texts[tries];
+tries++;
+yes.style.transform=`scale(${1+tries*0.3})`;
+}else{
+no.disabled=true;
+}
+};
+
+yes.onclick=()=>{
+letter.style.display="none";
+celebration.style.display="block";
+startFireworks();
+petals();
+};
+
+/* fireworks */
+const canvas=document.getElementById("fireworks");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+function startFireworks(){
+for(let i=0;i<80;i++){
+particles.push({
+x:canvas.width/2,
+y:canvas.height/2,
+vx:(Math.random()-0.5)*8,
+vy:(Math.random()-0.5)*8,
+life:100
+});
+}
+animate();
+}
+
+function animate(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+particles.forEach(p=>{
+ctx.fillStyle="hsl("+Math.random()*360+",100%,60%)";
+ctx.fillRect(p.x,p.y,3,3);
+p.x+=p.vx;
+p.y+=p.vy;
+p.life--;
+});
+particles=particles.filter(p=>p.life>0);
+if(particles.length>0) requestAnimationFrame(animate);
+}
+
+/* petals */
+function petals(){
+setInterval(()=>{
+let petal=document.createElement("div");
+petal.textContent="🌹";
+petal.style.position="fixed";
+petal.style.left=Math.random()*100+"vw";
+petal.style.top="-20px";
+petal.style.fontSize="20px";
+document.body.appendChild(petal);
+
+let fall=setInterval(()=>{
+petal.style.top=parseInt(petal.style.top)+5+"px";
+if(parseInt(petal.style.top)>window.innerHeight){
+clearInterval(fall);
+petal.remove();
+}
+},30);
+
+},200);
+}
+</script>
+
+</body>
+</html>
